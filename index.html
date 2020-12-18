@@ -99,17 +99,14 @@
       const orange = document.getElementById("orange")
       const green = document.getElementById("green")
       const btnStart = document.getElementById("btnStart")
-//En esta clase generamos la secuencia de numeros
-//aleatorios que nos va a servir para iluminar el
-//juego.
+
       class Game {
          constructor() {
            this.start()
            this.generateSequence()
+           this.nextLvl()
          }
-      // si quieres crear elementos dentro de la 
-      // memoria de la clase, puedes usar 
-      //this.nombreDelElemento
+         
          start() {
            btnStart.classList.add("hide")
            this.lvl = 1
@@ -121,19 +118,52 @@
            }
          }
          
-         // Una forma de crear arrays automaticamente es
-         // por medio de new Array("numero de elementos que quieres")
-         // Si quieres que no existan vacios puedes poner .fill(0)
          generateSequence () {
            this.sequence = new Array(10).fill(0).map(n => 
            Math.floor(Math.random()*4))
          }
+         
+         nextLvl() {
+           this.iluminateSequence()
+         }
+         
+         transformNumberToColor (num) {
+           switch (num) {
+             case 0:
+               return "lightblue"
+             case 1:
+               return "violet"
+             case 2:
+               return "orange"
+             case 3:
+               return "green"
+              
+           }
+         }
+         
+         iluminateSequence() {
+           for (let i = 0; i < this.lvl; i++){
+             const color = this.transformNumberToColor(this.sequence[i])
+             setTimeout(() => this.iluminateColor(color), 1000 * i)  
+         }
+        }
+        
+        iluminateColor(color) {
+          this.colors[color].classList.add ("light")
+          setTimeout(()=> this.turnOffColor(color), 400)
+        }
+        
+        
+        turnOffColor(color) {
+         this.colors[color].classList.remove ("light")
+        }
       }
-      
       function startGame() {
         alert("The game is about to start")
         window.game = new Game()
       }
+    
     </script>
   </body>
 </html>
+ 
