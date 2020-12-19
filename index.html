@@ -2,8 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Simon Dice</title>
+    <title>Simon Tells</title>
     <style>
+      * {
+        font-family: "Arial";
+      }
+      
       body {
         margin: 0;
         background: #dedede;
@@ -86,12 +90,14 @@
   </head>
   <body>
     <div class="gameboard">
-      <div id="lightblue" class="color lightblue left" data-color="celeste"></div>
-      <div id="violet" class="color violet right" data-color="violeta"></div>
-      <div id="orange" class="color orange left" data-color="naranja"></div>
-      <div id="green" class="color green right" data-color="verde"></div>
+      <div id="lightblue" class="color lightblue left" data-color="lightblue">
+      </div>
+      <div id="violet" class="color violet right" data-color="violet"></div>
+      <div id="orange" class="color orange left" data-color="orange"></div>
+      <div id="green" class="color green right" data-color="green"></div>
       <button id="btnStart" class="btn-start" onclick="startGame()">Empezar a jugar!</button>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <script>
       
       const lightblue = document.getElementById("lightblue")
@@ -99,16 +105,20 @@
       const orange = document.getElementById("orange")
       const green = document.getElementById("green")
       const btnStart = document.getElementById("btnStart")
-
+      const LAST_LELV = 10
+      
       class Game {
          constructor() {
+           this.start = this.start.bind(this)
            this.start()
            this.generateSequence()
-           this.nextLvl()
+           setTimeout(this.nextLvl, 500) 
          }
          
          start() {
-           btnStart.classList.add("hide")
+           this.nextLvl = this.nextLvl.bind(this)
+           this.choosecolor = this.choosecolor.bind(this)
+           this.toggleBtnStart()
            this.lvl = 1
            this.colors = {
             lightblue,
@@ -117,14 +127,24 @@
             green
            }
          }
+         toggleBtnStart() {
+           if (btnStart.classList.contains("hide")){
+             btnStart.classList.remove("hide")
+           } else {
+             btnStart.classList.add("hide")
+           }
+         }
+         
          
          generateSequence () {
-           this.sequence = new Array(10).fill(0).map(n => 
+           this.sequence = new Array(LAST_LELV).fill(0).map(n => 
            Math.floor(Math.random()*4))
          }
          
          nextLvl() {
+           this.sublvl = 0
            this.iluminateSequence()
+           this.addEventClick()
          }
          
          transformNumberToColor (num) {
@@ -141,6 +161,20 @@
            }
          }
          
+         transformColorToNumber (color) {
+           switch (color) {
+             case "lightblue":
+               return 0
+             case "violet":
+               return 1
+             case "orange":
+               return 2
+             case "green":
+               return 3
+              
+           }
+         }
+         
          iluminateSequence() {
            for (let i = 0; i < this.lvl; i++){
              const color = this.transformNumberToColor(this.sequence[i])
@@ -149,17 +183,63 @@
         }
         
         iluminateColor(color) {
-          this.colors[color].classList.add ("light")
-          setTimeout(()=> this.turnOffColor(color), 400)
+          this.colors[color].classList.add("light")
+          setTimeout(()=> this.turnOffColor(color), 350)
         }
         
         
         turnOffColor(color) {
-         this.colors[color].classList.remove ("light")
+         this.colors[color].classList.remove("light")
+        }
+        
+        addEventClick() {
+          this.colors.lightblue.addEventListener("click", this.choosecolor)
+          this.colors.violet.addEventListener("click", this.choosecolor)
+          this.colors.orange.addEventListener("click", this.choosecolor)
+          this.colors.green.addEventListener("click", this.choosecolor)
+        }
+        
+        delateElementsClick () {
+          this.colors.lightblue.removeEventListener("click", this.choosecolor)
+          this.colors.violet.removeEventListener("click", this.choosecolor)
+          this.colors.orange.removeEventListener("click", this.choosecolor)
+          this.colors.green.removeEventListener("click", this.choosecolor)
+          
+        }
+        
+        choosecolor(ev) {
+          const nameColor = ev.target.dataset.color
+          const numberColor = this.transformColorToNumber(nameColor)
+          this.iluminateColor(nameColor)
+          if (numberColor === this.sequence[this.sublvl]) {
+            this.sublvl++
+              if (this.sublvl === this.lvl) {
+              this.lvl++
+              this.delateElementsClick()
+                if (this.lvl === (LAST_LELV + 1)) {
+                  this.winTheGame()
+                } else {
+                setTimeout(this.nextLvl, 1500)
+                 }
+              } 
+          }else {
+            this.loseTheGame()
+          } 
+        }
+        
+        winTheGame() {
+          swal("Simon Tells", "Sorry,You Lose", "success")
+          .then(this.start)
+        }
+        loseTheGame() {
+          swal("Simon Tells", "Congrats,You Win", "error")
+          .then(() => {
+            this.delateElementsClick()
+            .this.start()
+          })
         }
       }
       function startGame() {
-        alert("The game is about to start")
         window.game = new Game()
       }
     
